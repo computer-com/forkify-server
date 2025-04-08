@@ -9,10 +9,15 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 
 const corsOptions = {
-  origin: ['http://localhost:5173'], 
+  origin: [
+    'http://localhost:5173',
+    'https://computer-com.github.io',
+    'https://computer-com.github.io/forkify'
+  ],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
+  exposedHeaders: ['Authorization']
 };
 
 // CORS Configuration
@@ -24,13 +29,15 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use(bodyParser.json());
 
 // Serve static files from the React app
-const clientBuildPath = path.join(__dirname, '../client/dist');
-if (process.env.NODE_ENV === 'production') {
-  app.use(express.static(clientBuildPath));
-}
+const clientBuildPath = path.join(__dirname, 'client/dist');
+app.use(express.static(clientBuildPath));
 
 // Security Headers Middleware
 app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', 'https://computer-com.github.io');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  res.header('Access-Control-Allow-Credentials', 'true');
   res.header('Cross-Origin-Opener-Policy', 'same-origin-allow-popups');
   res.header('Cross-Origin-Embedder-Policy', 'require-corp');
   res.header('Access-Control-Expose-Headers', 'Authorization');
@@ -38,7 +45,7 @@ app.use((req, res, next) => {
 });
 
 // MongoDB Connection
-mongoose.connect(process.env.MONGO_URI || process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
+mongoose.connect(process.env.MONGO_URI || process.env.MONGO_URI)
   .then(() => console.log('MongoDB Atlas connected'))
   .catch(err => console.error('Mongo DB Atlas Connection failed' ,err));
 
@@ -73,11 +80,9 @@ app.use("/api/reservations", reservationAdminRoutes);
 app.use("/api/settings", settingsRoutes);
 
 // Catch-all route to serve the React app
-if (process.env.NODE_ENV === 'production') {
-  app.get('*', (req, res) => {
-    res.sendFile(path.join(clientBuildPath, 'index.html'));
-  });
-}
+app.get('*', (req, res) => {
+  res.sendFile(path.join(clientBuildPath, 'index.html'));
+});
 
 // Error Handling Middleware
 app.use((err, req, res, next) => {
