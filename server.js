@@ -24,7 +24,10 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use(bodyParser.json());
 
 // Serve static files from the React app
-app.use(express.static(path.join(__dirname, '../client/dist')));
+const clientBuildPath = path.join(__dirname, '../client/dist');
+if (process.env.NODE_ENV === 'production') {
+  app.use(express.static(clientBuildPath));
+}
 
 // Security Headers Middleware
 app.use((req, res, next) => {
@@ -70,9 +73,11 @@ app.use("/api/reservations", reservationAdminRoutes);
 app.use("/api/settings", settingsRoutes);
 
 // Catch-all route to serve the React app
-app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, '../client/dist/index.html'));
-});
+if (process.env.NODE_ENV === 'production') {
+  app.get('*', (req, res) => {
+    res.sendFile(path.join(clientBuildPath, 'index.html'));
+  });
+}
 
 // Error Handling Middleware
 app.use((err, req, res, next) => {
