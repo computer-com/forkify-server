@@ -18,11 +18,13 @@ const corsOptions = {
 // CORS Configuration
 app.use(cors(corsOptions));
 
-
 // Middleware
 app.use(express.json());
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use(bodyParser.json());
+
+// Serve static files from the React app
+app.use(express.static(path.join(__dirname, '../client/dist')));
 
 // Security Headers Middleware
 app.use((req, res, next) => {
@@ -52,7 +54,6 @@ const menuRoutes = require("./routes/menuRoutes");
 const reservationAdminRoutes = require("./routes/reservationAdminRoutes");
 const settingsRoutes = require("./routes/settingsRoutes");
 
-
 // Route Middlewares
 app.use('/api/users', userRoutes);
 app.use('/api/auth', authRoutes);
@@ -68,11 +69,15 @@ app.use("/api/menu", menuRoutes);
 app.use("/api/reservations", reservationAdminRoutes);
 app.use("/api/settings", settingsRoutes);
 
+// Catch-all route to serve the React app
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, '../client/dist/index.html'));
+});
+
 // Error Handling Middleware
 app.use((err, req, res, next) => {
   console.error(err.stack);
   res.status(500).json({ error: 'Internal Server Error' });
 });
-
 
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
