@@ -4,7 +4,7 @@ const Restaurant = require('../models/Restaurant');
 const User = require('../models/User');
 const { auth, isAdmin, isOwner } = require('../middleware/auth');
 const router = express.Router();
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 const slugify = require('slugify');
 
 // Configure multer for image upload
