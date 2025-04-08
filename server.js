@@ -28,6 +28,20 @@ app.use(express.json());
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use(bodyParser.json());
 
+// Content Security Policy Middleware
+app.use((req, res, next) => {
+  res.setHeader(
+    'Content-Security-Policy',
+    "default-src 'self' https://computer-com.github.io https://forkify-server.onrender.com; " +
+    "script-src 'self' 'unsafe-inline' 'unsafe-eval'; " +
+    "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; " +
+    "font-src 'self' https://fonts.gstatic.com; " +
+    "img-src 'self' data: https:; " +
+    "connect-src 'self' https://forkify-server.onrender.com;"
+  );
+  next();
+});
+
 // Serve static files from the React app
 const clientBuildPath = path.join(__dirname, 'client/dist');
 app.use(express.static(clientBuildPath));
